@@ -49,7 +49,20 @@ for (i in 1:length(exam_list)) {
 # define indicator for whether exam 4 (baseline) is complete
 analytic$complete4 <- 
   analytic %>%
-  select(matches(".*4$")) %>%
+  select(
+    matches(".*4$"),
+    cpd3,
+    bmi3,
+    sbp3,
+    calc_ldl3,
+    hrx3,
+    liprx3,
+    curr_diab3,
+    beer_week3,
+    wine_week3,
+    liquor_week3,
+    currsmk3
+  ) %>%
   select_if(function(x) any(is.na(x))) %>%
   is.na() %>%
   rowSums() == 0 
