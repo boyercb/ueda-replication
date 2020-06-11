@@ -68,13 +68,18 @@ analytic$complete4 <-
   rowSums() == 0 
 analytic$complete4 <- as.numeric(analytic$complete4)
   
+# define baseline date as date at exam 4 or mean if skipped exam 4
+analytic$bdate <- 
+  if_else(is.na(analytic$date4), mean(analytic$date4, na.rm = TRUE), analytic$date4)
+
 # apply inclusion/exclusion criteria
 analytic <-
   analytic %>% 
-  filter(att4 == 1 & complete4 == 1) %>%        # attended 4th exam and has complete data
-  filter(cvddate > date4) %>%                   # no prior CVD diagnosis at 4th exam
-  filter(datedth > date4 | is.na(datedth)) %>%  # alive at 4th exam
-  filter(age4 <= 70)                            # age 70 or younger at 4th exam
+  filter(datedth > bdate | is.na(datedth)) %>%  # alive at 4th exam
+  filter(cvddate > bdate) %>%                   # no prior CVD diagnosis at 4th exam
+  filter(age4 <= 70) %>%                        # age 70 or younger at 4th exam
+  filter(att4 == 1 & complete4 == 1)            # attended 4th exam and has complete baseline data
+  
   
 
 
