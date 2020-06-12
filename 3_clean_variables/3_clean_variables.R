@@ -71,8 +71,6 @@ analytic_long <- analytic_long %>%
     dm = curr_diab,
     smk = currsmk
   ) %>%
-  # add age at 4th examination cycle as baseline age
-  left_join(filter(analytic_long, exam == 4) %>% select(age, pid), by = "pid") %>%
   # drop intermediate variables
   select(
     -matches("wine"), 
