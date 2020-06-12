@@ -75,7 +75,9 @@ analytic_long <- analytic_long %>%
   select(
     -matches("wine"), 
     -starts_with("beer"), 
-    -starts_with("liquor")
+    -starts_with("liquor"),
+    -matches(".*[a-z][1-3]"),
+    -bdate
   )
 
 
