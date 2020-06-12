@@ -100,8 +100,98 @@ analytic_long <-
   ungroup()
 
 
-# Create censoring indicator ----------------------------------------------
+# Censor individuals at the appropriate time ------------------------------
 
+analytic_long <- 
+  analytic_long %>%
+  mutate(
+    drop = case_when(
+      # if you died or got CHD prior to interval then censor by dropping
+      # subsequent exams
+      datedth <= date | chddate <= date ~ 1, 
+      
+      # if you died or got CHD during this interval then keep 
+      (date <= datedth & datedth <= edate) | (date <= chddate & chddate <= edate) ~ 0,
+      
+      # always keep exam 4
+      exam == 4 ~ 0,
+      
+      # if you completed all exams then keep 
+      fupat == "1_1_1_1" ~ 0,
+      
+      # if you have two or more consecutive misses drop after possibly carrying one forward
+      fupat == "1_0_0_0" & exam > 5 ~ 1,
+      fupat == "1_1_0_0" & exam == 7 ~ 1,
+      fupat == "1_0_0_1" & exam > 5 ~ 1,
+      
+      # pattern: 1 0 0 0
+      # if you died or got CHD after 4th exam, censor by dropping exams 5, 6, and 7
+      fupat == "1_0_0_0" & (datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 1,
+      # if you didn't die or get CHD after 4th exam, carry forward one and then censor
+      fupat == "1_0_0_0" & !(datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 0,
+      # pattern: 1 1 0 0
+      # if you died or got CHD after 5th exam, censor by dropping exams 6 and 7
+      fupat == "1_1_0_0" & (datedth <= 2922 | chddate <= 2922) & exam == 6 ~ 1, 
+      fupat == "1_1_0_0" & (datedth <= 2922 | chddate <= 2922) & exam == 5 ~ 0, 
+      # if you didn't die or get CHD after 5th exam, carry forward one and then censor
+      fupat == "1_1_0_0" & !(datedth <= 2922 | chddate <= 2922) & exam == 6 ~ 0,
+      fupat == "1_1_0_0" & !(datedth <= 2922 | chddate <= 2922) & exam == 5 ~ 0, 
+      
+      # pattern: 1 1 1 0
+      fupat == "1_1_1_0" & exam == 5 ~ 1,
+      # if you died or got CHD after 6th exam, censor by dropping exam 7
+      fupat == "1_1_1_0" & (datedth <= 4383 | chddate <= 4383) & exam == 7 ~ 1, 
+      fupat == "1_1_1_0" & (datedth <= 4383 | chddate <= 4383) & exam == 6 ~ 0, 
+      # if you didn't die or get CHD after 6th exam, carry forward one and then censor
+      fupat == "1_1_1_0" & !(datedth <= 4383 | chddate <= 4383) & exam == 7 ~ 0, 
+      fupat == "1_1_1_0" & !(datedth <= 4383 | chddate <= 4383) & exam == 6 ~ 0, 
+      
+      # pattern: 1 0 0 1
+      # if you died or got CHD after 4th exam, censor by dropping exams 5, 6, and 7
+      fupat == "1_0_0_1" & (datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 1,
+      # if you didn't die or get CHD after 4th exam, carry forward one and then censor
+      fupat == "1_0_0_1" & !(datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 0,
+      # pattern: 1 0 1 0
+      # if you died or got CHD after 4th exam, censor by dropping exams 5, 6, and 7
+      fupat == "1_0_1_0" & (datedth <= 1461 | chddate <= 1461) & exam > 4 ~ 1,
+      fupat == "1_0_1_0" & !(datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 0,
+      # if you died or got CHD after 5th exam, censor by dropping exams 6 and 7
+      fupat == "1_0_1_0" & (datedth <= 2922 | chddate <= 2922) & exam > 5 ~ 1, # should already be covered
+      fupat == "1_0_1_0" & (datedth <= 2922 | chddate <= 2922) & exam == 5 ~ 0, 
+      fupat == "1_0_1_0" & !(datedth <= 2922 | chddate <= 2922) & exam == 6 ~ 0, 
+      # if you died or got CHD during 6th exam, drop 7th exam
+      fupat == "1_0_1_0" &
+        ((date <= datedth & datedth <= edate) | (date <= chddate & chddate <= edate)) & 
+        exam == 7 ~ 1,
+      fupat == "1_0_1_0" &
+        ((date <= datedth & datedth <= edate) | (date <= chddate & chddate <= edate)) & 
+        exam == 6 ~ 0,
+      # otherwise leave it
+      fupat == "1_0_1_0" &
+        !((date <= datedth & datedth <= edate) | (date <= chddate & chddate <= edate)) & 
+        exam == 7 ~ 0,
+      fupat == "1_0_1_0" &
+        !((date <= datedth & datedth <= edate) | (date <= chddate & chddate <= edate)) & 
+        exam == 6 ~ 0,
+      # if exam 7 still not assigned at this point means alive and CHD-free at exam 7
+      fupat == "1_0_1_0" & exam == 7 ~ 0,
+      
+      # pattern: 1 0 1 1
+      # if you died or got CHD after 4th exam, censor by dropping exam 5 (6 and 7 will already be taken care of)
+      fupat == "1_0_1_1" & (datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 1,
+      fupat == "1_0_1_1" & !(datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 0,
+      fupat == "1_0_1_1" & exam %in% c(6, 7) ~ 0,
+      
+      # pattern: 1 1 0 1
+      # if you died or got CHD after 5th exam, censor by dropping exam 6 (7 will already be taken care of)
+      fupat == "1_1_0_1" & (datedth <= 2922 | chddate <= 2922) & exam == 6 ~ 1,
+      fupat == "1_1_0_1" & !(datedth <= 2922 | chddate <= 2922) & exam == 6 ~ 0,
+      fupat == "1_1_0_1" & exam %in% c(5, 6, 7) ~ 0,
+    )
+  )
+
+# censor by dropping censored observations 
+analytic_long <- filter(analytic_long, drop == 0)
 
 
 # Handle missing data -----------------------------------------------------
