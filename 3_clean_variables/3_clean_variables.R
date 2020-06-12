@@ -199,4 +199,10 @@ analytic_long <- filter(analytic_long, drop == 0)
 # Handle missing data -----------------------------------------------------
 
 # last observation carry forward
-#analytic_long <- mutate_at()
+analytic_long <- 
+  analytic_long %>%
+  group_by(pid) %>%
+  fill(covs_tv) %>%
+  ungroup()
+
+
