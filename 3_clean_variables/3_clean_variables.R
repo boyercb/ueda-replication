@@ -22,6 +22,7 @@ analytic_long <- analytic_long %>%
       
     # baseline standard drinks per day (continuous)
     pre_dpd = (beer_week3 + wine_week + liquor_week) / 7,
+    pre_dpd = (beer_week3 + wine_week3 + liquor_week3) / 7,
     
     # baseline standard drinks per day (categorical)
     pre_dpd_1 = if_else(pre_dpd == 0, 1, 0),               # 0 drinks per day
