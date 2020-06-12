@@ -21,7 +21,6 @@ analytic_long <- analytic_long %>%
     eversmk = as.numeric(currsmk1 + currsmk2 + currsmk3 > 0), 
       
     # baseline standard drinks per day (continuous)
-    pre_dpd = (beer_week3 + wine_week + liquor_week) / 7,
     pre_dpd = (beer_week3 + wine_week3 + liquor_week3) / 7,
     
     # baseline standard drinks per day (categorical)
@@ -70,8 +69,6 @@ analytic_long <- analytic_long %>%
     pre_dm = curr_diab3,
     ldl = calc_ldl,
     dm = curr_diab,
-    smk = currsmk,
-    agetv = age
     smk = currsmk
   ) %>%
   # add age at 4th examination cycle as baseline age
