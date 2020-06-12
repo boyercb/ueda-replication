@@ -18,8 +18,18 @@ analytic_long <- analytic_long %>%
     marital_3 = if_else(marital %in% c(3, 4, 5), 1, 0), # widowed, divorced, or separated
     
     # ever smoked (0/1)
-    eversmk = as.numeric(currsmk1 + currsmk2 + currsmk3 > 0), 
-      
+    eversmk = case_when(
+      currsmk1 == 1 | currsmk2 == 1 | currsmk3 == 1 ~ 1, 
+      currsmk1 == 1 & (is.na(currsmk2) | is.na(currsmk3)) ~ 1,
+      currsmk2 == 1 & (is.na(currsmk1) | is.na(currsmk3)) ~ 1,
+      currsmk3 == 1 & (is.na(currsmk1) | is.na(currsmk2)) ~ 1,
+      currsmk1 == 0 & currsmk2 == 0 & currsmk3 == 0 ~ 0, 
+      currsmk1 == 0 & (is.na(currsmk2) | is.na(currsmk3)) ~ 0,
+      currsmk2 == 0 & (is.na(currsmk1) | is.na(currsmk3)) ~ 0,
+      currsmk3 == 0 & (is.na(currsmk1) | is.na(currsmk2)) ~ 0,
+      TRUE ~ NA_real_
+    ),
+    
     # baseline standard drinks per day (continuous)
     pre_dpd = (beer_week3 + wine_week3 + liquor_week3) / 7,
     
