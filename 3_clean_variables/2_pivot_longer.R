@@ -1,3 +1,7 @@
+# create variables representing age and date at time 0 (start of follow up)
+analytic$age0 <- analytic$age4
+analytic$date0 <- analytic$date4
+
 # pivot to appropriate person-time format for g-formula
 analytic_long <- 
   analytic %>%

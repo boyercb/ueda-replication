@@ -89,6 +89,16 @@ exam_list <- list(
   framingham$ex1_7d_v2
 )
 
+date_vars <-
+  c("chddate",
+    "chfdate",
+    "cvddate",
+    "datedth",
+    "date",
+    "lastsoe",
+    "lastatt",
+    "lastcon")
+
 covs_fixed <- c(
   "sex",
   "age",
