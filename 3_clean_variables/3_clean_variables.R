@@ -129,6 +129,7 @@ analytic_long <-
       fupat == "1_0_0_0" & (datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 1,
       # if you didn't die or get CHD after 4th exam, carry forward one and then censor
       fupat == "1_0_0_0" & !(datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 0,
+
       # pattern: 1 1 0 0
       # if you died or got CHD after 5th exam, censor by dropping exams 6 and 7
       fupat == "1_1_0_0" & (datedth <= 2922 | chddate <= 2922) & exam == 6 ~ 1, 
@@ -151,6 +152,7 @@ analytic_long <-
       fupat == "1_0_0_1" & (datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 1,
       # if you didn't die or get CHD after 4th exam, carry forward one and then censor
       fupat == "1_0_0_1" & !(datedth <= 1461 | chddate <= 1461) & exam == 5 ~ 0,
+
       # pattern: 1 0 1 0
       # if you died or got CHD after 4th exam, censor by dropping exams 5, 6, and 7
       fupat == "1_0_1_0" & (datedth <= 1461 | chddate <= 1461) & exam > 4 ~ 1,
