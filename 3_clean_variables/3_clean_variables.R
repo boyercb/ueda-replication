@@ -81,12 +81,23 @@ analytic_long <- analytic_long %>%
   )
 
 
-# Create and clean outcomes -----------------------------------------------
+# Fix all time variables to start of follow up ----------------------------
 
-analytic_long <- analytic_long %>%
+analytic_long <-
+  analytic_long %>%
+  mutate_at(date_vars, function(x) (x - analytic_long$date0))
+
+analytic_long <-
+  analytic_long %>%
+  group_by(pid) %>%
   mutate(
-    chd2 = if_else(chddate <= date, 1, 0)
-  )
+    edate = case_when(
+      exam %in% c(4,5,6) ~ lead(date) - 1,
+      exam == 7 ~ date + 4 * 365.25
+    ),
+    datedth = if_else(is.na(datedth), lastcon, datedth)
+  ) %>%
+  ungroup()
 
 
 # Create censoring indicator ----------------------------------------------
