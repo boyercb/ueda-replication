@@ -150,3 +150,73 @@ analytic_long <-
   ungroup()
 
 
+# Create and clean outcomes -----------------------------------------------
+
+analytic_long <- analytic_long %>%
+  mutate(
+    event_chd = case_when(
+      # if never got CHD code as 0
+      chd == 0 ~ 0,
+      
+      # if got CHD and event occurs within interval code as 1
+      chd == 1 & (date <= chddate) & (chddate <= edate) ~ 1,
+      
+      # if event occurs in future code as 0
+      chd == 1 & chddate > edate ~ 0
+    ),
+    event_dth = case_when(
+      # if never died code as 0
+      is.na(dthrvwd) ~ 0,
+      
+      # if died and death occured within interval code as 1
+      dthrvwd == 1 & chd == 0 & (date <= datedth) & (datedth <= edate) ~ 1,
+      dthrvwd == 1 & chd == 1 & (date <= datedth) & (datedth <= edate) & datedth < chddate ~ 1,
+      dthrvwd == 1 & chd == 1 & (date <= datedth) & (datedth <= edate) & datedth >= chddate ~ 0,
+      
+      # if event occurs in future code as 0
+      dthrvwd == 1 & datedth > edate ~ 0
+    )
+  )
+
+# defensive coding: stop if more than one event per person
+stopifnot(
+  analytic_long %>%
+    group_by(pid) %>%
+    summarise(events = sum(event_chd)) %>%
+    filter(events > 1) %>%
+    nrow() == 0
+)
+
+stopifnot(
+  analytic_long %>%
+    group_by(pid) %>%
+    summarise(events = sum(event_dth)) %>%
+    filter(events > 1) %>%
+    nrow() == 0
+)
+
+# verify distributions of follow up and events
+analytic_long %>%
+  group_by(pid) %>%
+  summarise(
+    start = min(exam),
+    stop = max(exam),
+    chd = sum(event_chd),
+    died = sum(event_dth)
+  ) %>%
+  count(chd, died, start, stop)
+
+# # A tibble: 11 x 5
+#      chd  died start stop      n
+#    <dbl> <dbl> <chr> <chr> <int>
+#  1     0     0 4     5        73
+#  2     0     0 4     6        61
+#  3     0     0 4     7      2242
+#  4     0     1 4     4        28
+#  5     0     1 4     5        43
+#  6     0     1 4     6        33
+#  7     0     1 4     7        65
+#  8     1     0 4     4        49
+#  9     1     0 4     5        52
+# 10     1     0 4     6        61
+# 11     1     0 4     7        63
