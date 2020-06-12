@@ -154,6 +154,6 @@ covs_tv <- c(
 )
 
 dvs <- c(
-  "chd",
-  "death"
+  "event_chd",
+  "event_dth"
 )
