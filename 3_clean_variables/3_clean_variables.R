@@ -66,7 +66,12 @@ analytic_long <- analytic_long %>%
     cpd_2 = if_else(cpd == 1, 1, 0),             # 1 or fewer
     cpd_3 = if_else(cpd > 1 & cpd < 5, 1, 0),    # 2 to 4 
     cpd_4 = if_else(cpd >= 5 & cpd < 25, 1, 0),  # 5 to 24
-    cpd_5 = if_else(cpd > 25, 1, 0)              # 25 or more
+    cpd_5 = if_else(cpd > 25, 1, 0),            # 25 or more
+    
+    # exam indicators (0/1)
+    exam = as.numeric(exam),
+    time = exam - 4,
+    time_f = factor(time)
   ) %>%
   # rename variables to final covariate names
   rename(
