@@ -7,10 +7,10 @@ analytic_long <- analytic_long %>%
     sex = sex - 1,
     
     # educational level (categorical)
-    educ_1 = if_else(educ < 12, 1, 0),              # less than high school
-    educ_2 = if_else(educ >= 12 & educ < 16, 1, 0), # high school/some college
-    educ_3 = if_else(educ == 16, 1, 0),             # bachelor's degree
-    educ_4 = if_else(educ > 16, 1, 0),              # postgraduate education
+    educ_1 = if_else(educ3 == 6, 1, 0),              # less than high school
+    educ_2 = if_else(educ3 == 1 | educ3 == 2, 1, 0), # high school/some college
+    educ_3 = if_else(educ3 == 3, 1, 0),              # bachelor's degree
+    educ_4 = if_else(educ3 == 4 | educ3 == 5, 1, 0), # postgraduate education
   
     # marital status (categorical)
     marital_1 = if_else(marital == 1, 1, 0),            # single

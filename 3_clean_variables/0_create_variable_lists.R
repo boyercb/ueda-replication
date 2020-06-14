@@ -1,7 +1,7 @@
 id_vars <- c("pid", "idtype")
 
 exam2_vars <- c(
-  "educ" = "b43" # years of education
+  "educ2" = "b43" # years of education
 )
 
 exam3_vars <- c(
@@ -71,13 +71,19 @@ exam7_vars <- c(
   "liquor_limit7"     = "g115"  # COCKTAILS-LIMIT AT ONE TIME
 )
 
+psy_vars <- c(
+  "edul3" = "py122", # years of schooling
+  "educ3" = "py123"  # highest degree completed
+)
+
 exam_varlist <- list(
   exam2_vars,
   exam3_vars,
   exam4_vars,
   exam5_vars,
   exam6_vars,
-  exam7_vars
+  exam7_vars,
+  psy_vars
 )
 
 exam_list <- list(
@@ -86,7 +92,8 @@ exam_list <- list(
   framingham$ex1_4d_v1,
   framingham$ex1_5d_v1,
   framingham$ex1_6d_v1,
-  framingham$ex1_7d_v2
+  framingham$ex1_7d_v2,
+  framingham$q_psych_ex03_1_0167d
 )
 
 date_vars <-
