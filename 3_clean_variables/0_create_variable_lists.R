@@ -108,8 +108,7 @@ date_vars <-
 
 covs_fixed <- c(
   "sex",
-  "age",
-  "educ",
+  "age0",
   "educ_1",
   "educ_2",
   "educ_3",
@@ -118,7 +117,6 @@ covs_fixed <- c(
   "marital_2",
   "marital_3",
   "eversmk",
-  "pre_dpd",
   "pre_dpd_1",
   "pre_dpd_2",
   "pre_dpd_3",
@@ -126,7 +124,6 @@ covs_fixed <- c(
   "pre_bmi",
   "pre_dm",
   "pre_sbp",
-  "pre_cpd",
   "pre_cpd_1",
   "pre_cpd_2",
   "pre_cpd_3",
@@ -135,30 +132,37 @@ covs_fixed <- c(
   "pre_ldl",
   "pre_hrx",
   "pre_liprx"
+#  "time_f"
 )
 
 covs_tv <- c(
-  "exam",
   "smk",
   "cpd",
-  "cpd_1",
-  "cpd_2",
-  "cpd_3",
-  "cpd_4",
-  "cpd_5",
   "drk",
   "dpd",
-  "dpd_1",
-  "dpd_2",
-  "dpd_3",
-  "dpd_4",
+  # "dpd_1",
+  # "dpd_2",
+  # "dpd_3",
+  # "dpd_4",
   "bmi",
   "dm",
   "sbp",
   "ldl",
-  "hrx",
-  "liprx"
+  "hrx"
+  #"liprx"
 )
+
+covs_refs <- c(
+  "educ_4",
+  "marital_3",
+  "pre_dpd_4",
+  "pre_cpd_5",
+  "dpd_4"
+)
+
+covs_model <- c(covs_fixed, covs_tv)
+covs_dvs <- covs_tv[!covs_tv %in% covs_refs & !grepl("dpd_", covs_tv)]
+covs_ivs <- c(covs_model[!covs_model %in% c(covs_refs, "smk", "drk")], "as.factor(time)", "I(age0^2)")
 
 dvs <- c(
   "event_chd",
