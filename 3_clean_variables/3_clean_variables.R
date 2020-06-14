@@ -235,3 +235,11 @@ analytic_long %>%
 #  9     1     0 4     5        52
 # 10     1     0 4     6        61
 # 11     1     0 4     7        63
+
+analytic_long <- select(
+  analytic_long,
+  covs_model,
+  id_vars,
+  dvs,
+  time
+)
