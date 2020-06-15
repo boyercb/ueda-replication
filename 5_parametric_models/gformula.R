@@ -12,6 +12,7 @@ interventions <- list(
 
 int_descript <- c('low', 'moderate', 'high', 'very high')
 
+
 # Define covariate models -------------------------------------------------
 
 covtypes <- c(
@@ -161,3 +162,66 @@ fit <-
     ncores = parallel::detectCores() - 1,
     model_fits = TRUE
   )
+
+
+# Create results tables ---------------------------------------------------
+
+sink("9_results/tables/cov_models.tex")
+texreg(
+  l = fit$fits[1:length(covs_dvs)],
+  booktabs = TRUE,
+  use.packages = FALSE,
+  table = FALSE
+) %>% print()
+sink()
+
+sink("9_results/tables/out_models.tex")
+texreg(
+  l = fit$fits[(length(covs_dvs) + 1):(length(covs_dvs) + 2)],
+  booktabs = TRUE,
+  use.packages = FALSE,
+  table = FALSE
+) %>% print()
+sink()
+
+sink("9_results/tables/gformula.tex")
+options(knitr.kable.NA = '')
+kable(
+  fit$result %>% 
+    filter(k == 3) %>% 
+    mutate(`Interv.` = case_when(
+      `Interv.` == 0 ~ "natural course",
+      `Interv.` == 1 ~ "low LDL (<130 mg/dL) for 16 years",
+      `Interv.` == 2 ~ "moderate LDL (130 mg/dL to <160 mg/dL) for 16 years",
+      `Interv.` == 3 ~ "high LDL (160 mg/dL to <190 mg/dL) for 16 years",
+      `Interv.` == 4 ~ "very high LDL (>190 mg/dL) for 16 years"
+      ),
+      r_95 = paste0("(", specd(`Risk lower 95% CI`, 3), ", ", specd(`Risk upper 95% CI`, 3), ")"),
+      rr_95 = paste0("(", specd(`RR lower 95% CI`, 3), ", ", specd(`RR upper 95% CI`, 3), ")"),
+      rd_95 = paste0("(", specd(`RD lower 95% CI`, 3), ", ", specd(`RD upper 95% CI`, 3), ")")
+    ) %>%
+    select(
+      `Interv.`,
+      `NP risk`,
+      `g-form risk`,
+      r_95,
+      `Risk ratio`,
+      rr_95, 
+      `Risk difference`,
+      rd_95
+      ), 
+  digits = 3,
+  col.names = c(
+    "Intervention",
+    "Nonparametric risk",
+    "G-formula risk",
+    "95% CI",
+    "Risk ratio",
+    "95% CI",
+    "Risk difference",
+    "95% CI"
+    ),
+  format = "latex",
+  booktabs = TRUE
+) %>% print()
+sink()
