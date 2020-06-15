@@ -33,10 +33,20 @@ source("3_clean_variables/2_pivot_longer.R")
 
 source("3_clean_variables/3_clean_variables.R")
 
+source("3_clean_variables/4_pivot_wider.R")
+
 
 # Descriptive analysis ----------------------------------------------------
 
-source("4_descriptive_analysis/0_baseline_summary")
+source("4_descriptive_analysis/0_baseline_summary.R")
 
-source("4_descriptive_analysis/1_exam_summary")
+source("4_descriptive_analysis/1_exam_summary.R")
+
+
+# Run parametric models ---------------------------------------------------
+
+source("5_parametric_models/gformula.R")
+
+source("5_parametric_models/gcomp_subs.R")
+
 
