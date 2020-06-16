@@ -1,6 +1,6 @@
 analytic_long %>%
-  select(covs_tv) %>%
-  group_by(exam) %>%
+  select(covs_tv, time) %>%
+  group_by(time) %>%
   summarise_all(mean, na.rm = T) %>%
-  pivot_longer(-exam) %>%
-  pivot_wider(names_from = "exam", names_prefix = "exam_")
+  pivot_longer(-time) %>%
+  pivot_wider(names_from = "time", names_prefix = "exam_")
