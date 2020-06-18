@@ -35,7 +35,8 @@ exam_vars <-
       "Diabetes mellitus",
       "Systolic blood pressure (mmHg)",
       "LDL-cholesterol",
-      "Blood pressure medication"
+      "Blood pressure medication",
+      "Lipid lowering medication"
     ),
     type = c("bin",
              "cont",
@@ -45,6 +46,7 @@ exam_vars <-
              "bin",
              "cont",
              "cont",
+             "bin",
              "bin")
   )
 

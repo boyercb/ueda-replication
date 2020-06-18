@@ -148,8 +148,8 @@ covs_tv <- c(
   "dm",
   "sbp",
   "ldl",
-  "hrx"
-  #"liprx"
+  "hrx",
+  "liprx"
 )
 
 covs_refs <- c(
@@ -162,7 +162,12 @@ covs_refs <- c(
 
 covs_model <- c(covs_fixed, covs_tv)
 covs_dvs <- covs_tv[!covs_tv %in% covs_refs & !grepl("dpd_", covs_tv)]
-covs_ivs <- c(covs_model[!covs_model %in% c(covs_refs, "smk", "drk")], "as.factor(time)", "I(age0^2)")
+
+covs_ivs <- c(
+  covs_model[!covs_model %in% c(covs_refs, "smk", "drk")], 
+  "as.factor(time)", 
+  "I(age0^2)"
+)
 
 dvs <- c(
   "event_chd",
