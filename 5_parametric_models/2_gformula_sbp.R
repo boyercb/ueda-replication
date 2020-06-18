@@ -1,16 +1,16 @@
 
 # Define interventions ----------------------------------------------------
 
-intvars <- list("ldl", "ldl", "ldl", "ldl")
+intvars <- list("sbp", "sbp", "sbp", "sbp")
 
 interventions <- list(
-  list(c(threshold, -Inf, 130)),
-  list(c(threshold, 130, 160)), 
-  list(c(threshold, 160, 190)),
-  list(c(threshold, 190, Inf))
+  list(c(threshold, -Inf, 119)),
+  list(c(threshold, 120, 139)), 
+  list(c(threshold, 140, 159)),
+  list(c(threshold, 160, Inf))
 )
 
-int_descript <- c('low', 'moderate', 'high', 'very high')
+int_descript <- c('low', 'pre-hypertension', 'stage 1', 'stage 2')
 
 
 # Define covariate models -------------------------------------------------
@@ -21,7 +21,7 @@ covtypes <- c(
   "binary",
   "normal",
   "normal",
-  "absorbing",
+  "binary",
   "normal",
   "normal",
   "binary"
@@ -29,7 +29,8 @@ covtypes <- c(
 
 restrictions <- list(
   c('cpd', 'smk == 1 & cpd > 0', simple_restriction, 0),
-  c('dpd', 'drk == 1 & dpd > 0', simple_restriction, 0)
+  c('dpd', 'drk == 1 & dpd > 0', simple_restriction, 0),
+  c('dm', 'lag1_dm == 0', simple_restriction, 1)
 )
 
 covparams <- list(
@@ -39,63 +40,63 @@ covparams <- list(
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + as.factor(time), 
+      lag1_sbp + lag1_ldl + lag1_liprx + as.factor(time), 
     
     # log-linear model for number of cigarettes per day among smokers
-    cpd ~ age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
+    cpd ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + as.factor(time), 
+      lag1_sbp + lag1_ldl + lag1_liprx + as.factor(time), 
     
     # logit model for probability of smoking
     drk ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + as.factor(time), 
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + as.factor(time), 
     
     # log-linear model for number of drinks per day
     dpd ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + as.factor(time), 
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + as.factor(time), 
     
     # linear model of BMI 
     bmi ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + dpd + as.factor(time),
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + dpd + as.factor(time),
     
     # logit model for diabetes (failure) 
     dm ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + dpd + bmi + as.factor(time),
-
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + dpd + bmi + as.factor(time),
+    
     # linear model for systolic blood pressure 
     sbp ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + dpd + bmi + dm + as.factor(time),
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + dpd + bmi + dm + as.factor(time),
     
     # linear model for LDL cholesterol
     ldl ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + dpd + bmi + dm + sbp + as.factor(time),
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + dpd + bmi + dm + sbp + as.factor(time),
     
     # logit model for hypertension meds
-    hrx ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
+    liprx ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
-      lag1_sbp + lag1_ldl + lag1_hrx + cpd + dpd + bmi + dm + sbp + ldl + as.factor(time)
+      lag1_sbp + lag1_ldl + lag1_liprx + cpd + dpd + bmi + dm + sbp + ldl + as.factor(time)
   ),
   covlink = c(
     "logit",
@@ -115,31 +116,31 @@ covparams <- list(
 
 ymodel <- 
   event_chd ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 +
-    marital_1 + marital_2 + eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 +
-    pre_bmi + pre_dm + pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 +
-    pre_cpd_4 + pre_ldl + pre_hrx + pre_liprx + cpd + dpd + bmi +
-    dm + sbp + ldl + hrx + as.factor(time) 
+  marital_1 + marital_2 + eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 +
+  pre_bmi + pre_dm + pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 +
+  pre_cpd_4 + pre_ldl + pre_hrx + pre_liprx + cpd + dpd + bmi +
+  dm + sbp + ldl + liprx + as.factor(time) 
 
 
 # Define competing event model --------------------------------------------
 
 compevent_model <- 
   event_dth ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 +
-    marital_1 + marital_2 + eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 +
-    pre_bmi + pre_dm + pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 +
-    pre_cpd_4 + pre_ldl + pre_hrx + pre_liprx + cpd + dpd + bmi +
-    dm + sbp + ldl + hrx + as.factor(time) 
-  
+  marital_1 + marital_2 + eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 +
+  pre_bmi + pre_dm + pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 +
+  pre_cpd_4 + pre_ldl + pre_hrx + pre_liprx + cpd + dpd + bmi +
+  dm + sbp + ldl + liprx + as.factor(time) 
+
 
 # Run gcomputation algorithm ----------------------------------------------
 
-fit <- 
+fit_sbp <- 
   gformula_survival(
     obs_data = drop_na(analytic_long),
     id = "pid",
     time_name = "time",
     time_points = 4,
-    covnames = covs_dvs, 
+    covnames = covs_dvs[covs_dvs != "hrx"], 
     covtypes = covtypes,
     covparams = covparams,
     outcome_name = "event_chd",
@@ -152,10 +153,10 @@ fit <-
     restrictions = restrictions,
     ref_int = 1,
     basecovs = covs_fixed[!covs_fixed %in% covs_refs],
-    histvars = list(covs_dvs),
+    histvars = list(covs_dvs[covs_dvs != "hrx"]),
     histories = c(lagged),
-    nsamples = 10,
-    nsimul = 10000,
+    nsamples = GFORM_BSAMP,
+    nsimul = GFORM_SIM,
     seed = 1234,
     show_progress = TRUE,
     parallel = TRUE,
@@ -166,62 +167,21 @@ fit <-
 
 # Create results tables ---------------------------------------------------
 
-sink("9_results/tables/cov_models.tex")
+sink("9_results/tables/cov_models_sbp.tex")
 texreg(
-  l = fit$fits[1:length(covs_dvs)],
+  l = fit_sbp$fits[1:(length(covs_dvs) - 1)],
   booktabs = TRUE,
   use.packages = FALSE,
   table = FALSE
 ) %>% print()
 sink()
 
-sink("9_results/tables/out_models.tex")
+sink("9_results/tables/out_models_sbp.tex")
 texreg(
-  l = fit$fits[(length(covs_dvs) + 1):(length(covs_dvs) + 2)],
+  l = fit_sbp$fits[length(covs_dvs):(length(covs_dvs) + 1)],
   booktabs = TRUE,
   use.packages = FALSE,
   table = FALSE
 ) %>% print()
 sink()
 
-sink("9_results/tables/gformula.tex")
-options(knitr.kable.NA = '')
-kable(
-  fit$result %>% 
-    filter(k == 3) %>% 
-    mutate(`Interv.` = case_when(
-      `Interv.` == 0 ~ "natural course",
-      `Interv.` == 1 ~ "low LDL (<130 mg/dL) for 16 years",
-      `Interv.` == 2 ~ "moderate LDL (130 mg/dL to <160 mg/dL) for 16 years",
-      `Interv.` == 3 ~ "high LDL (160 mg/dL to <190 mg/dL) for 16 years",
-      `Interv.` == 4 ~ "very high LDL (>190 mg/dL) for 16 years"
-      ),
-      r_95 = paste0("(", specd(`Risk lower 95% CI`, 3), ", ", specd(`Risk upper 95% CI`, 3), ")"),
-      rr_95 = paste0("(", specd(`RR lower 95% CI`, 3), ", ", specd(`RR upper 95% CI`, 3), ")"),
-      rd_95 = paste0("(", specd(`RD lower 95% CI`, 3), ", ", specd(`RD upper 95% CI`, 3), ")")
-    ) %>%
-    select(
-      `Interv.`,
-      `NP risk`,
-      `g-form risk`,
-      r_95,
-      `Risk ratio`,
-      rr_95, 
-      `Risk difference`,
-      rd_95
-      ), 
-  digits = 3,
-  col.names = c(
-    "Intervention",
-    "Nonparametric risk",
-    "G-formula risk",
-    "95% CI",
-    "Risk ratio",
-    "95% CI",
-    "Risk difference",
-    "95% CI"
-    ),
-  format = "latex",
-  booktabs = TRUE
-) %>% print()
-sink()

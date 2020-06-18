@@ -1,7 +1,8 @@
 # Define global analysis parameters ---------------------------------------
 
 CSV_ROOT_DIR <- "../../3_data_encrypted/Framingham_Offspring_2018b/Datasets/CSV/"
-
+GFORM_SIM <- 10000
+GFORM_BSAMP <- 1000
 
 # Packages and helper functions -------------------------------------------
 
@@ -45,8 +46,12 @@ source("4_descriptive_analysis/1_exam_summary.R")
 
 # Run parametric models ---------------------------------------------------
 
-source("5_parametric_models/gformula.R")
+source("5_parametric_models/1_gformula_ldl.R")
 
-source("5_parametric_models/gcomp_subs.R")
+source("5_parametric_models/2_gformula_sbp.R")
+
+source("5_parametric_models/3_gformula_table.R")
+
+#source("5_parametric_models/gcomp_subs.R")
 
 
