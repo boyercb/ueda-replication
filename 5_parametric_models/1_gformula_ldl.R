@@ -4,9 +4,9 @@
 intvars <- list("ldl", "ldl", "ldl", "ldl")
 
 interventions <- list(
-  list(c(threshold, -Inf, 130)),
-  list(c(threshold, 130, 160)), 
-  list(c(threshold, 160, 190)),
+  list(c(threshold, -Inf, 129)),
+  list(c(threshold, 130, 159)), 
+  list(c(threshold, 160, 189)),
   list(c(threshold, 190, Inf))
 )
 
