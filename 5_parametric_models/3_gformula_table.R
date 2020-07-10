@@ -66,5 +66,21 @@ kable(
   ),
   format = "latex",
   booktabs = TRUE
-) %>% print()
+) %>% 
+  kable_styling() %>%
+  group_rows(
+    start_row = 1,
+    5,
+    group_label = "Interventions on LDL-cholesterol",
+    bold = FALSE,
+    italic = TRUE
+  ) %>%
+  group_rows(
+    start_row = 6,
+    10,
+    group_label = "Interventions on systolic blood pressure",
+    bold = FALSE,
+    italic = TRUE
+  ) %>% 
+print()
 sink()
