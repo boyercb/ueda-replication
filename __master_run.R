@@ -2,13 +2,15 @@
 
 CSV_ROOT_DIR <- "../../3_data_encrypted/Framingham_Offspring_2018b/Datasets/CSV/"
 GFORM_SIM <- 10000
-GFORM_BSAMP <- 1000
+GFORM_BSAMP <- 10
 
 # Packages and helper functions -------------------------------------------
 
 source("0_packages/load_packages.R")
 
-source("1_helpers/01_helpers_generic.R")
+source("1_helpers/1_helpers_generic.R")
+
+source("1_helpers/2_helpers_gformula.R")
 
 #source("1_helpers/02_helpers_estimators.R")
 
