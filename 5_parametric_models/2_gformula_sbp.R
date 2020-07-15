@@ -91,7 +91,7 @@ covparams <- list(
       pre_ldl + pre_hrx + pre_liprx + lag1_cpd + lag1_dpd + lag1_bmi + lag1_dm +
       lag1_sbp + lag1_ldl + lag1_liprx + cpd + dpd + bmi + dm + sbp + as.factor(time),
     
-    # logit model for hypertension meds
+    # logit model for lipids meds
     liprx ~ sex + age0 + I(age0 ^ 2) + educ_1 + educ_2 + educ_3 + marital_1 + marital_2 +
       eversmk + pre_dpd_1 + pre_dpd_2 + pre_dpd_3 + pre_bmi + pre_dm +
       pre_sbp + pre_cpd_1 + pre_cpd_2 + pre_cpd_3 + pre_cpd_4 +
