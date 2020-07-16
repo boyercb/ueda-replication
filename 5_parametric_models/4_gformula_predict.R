@@ -159,13 +159,12 @@ fit_pred <-
 # predict risk on hold-out sample -----------------------------------------
 
 newdata <- drop_na(analytic_long)
-newdata$id <- newdata$pid
 
-df <- predict.gformula(
+predrisk <- predict.gformula(
   object = fit_pred,
   obs_data = data.table::as.data.table(drop_na(analytic_long)),
   newdata = data.table::as.data.table(newdata),
-  id = "id",
+  id = "pid",
   covnames = covs_dvs, 
   covtypes = covtypes,
   covparams = covparams,
@@ -185,6 +184,16 @@ df <- predict.gformula(
   # ncores = parallel::detectCores() - 1,
   model_fits = TRUE
 )
+
+predrisk <- predrisk %>%
+  pivot_longer(`0`:`3`, names_to = "time", values_to = "pred") %>%
+  mutate(time = as.numeric(time))
+
+analytic_hat <-
+  left_join(analytic_long, predrisk, by = c("pid", "time")) %>%
+  filter(time == 3)
+
+plot(pROC::roc(analytic_hat$event_chd, analytic_hat$pred))
 
 # Create results tables ---------------------------------------------------
 
