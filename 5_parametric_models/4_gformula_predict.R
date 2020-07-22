@@ -150,8 +150,6 @@ fit_pred <-
     nsimul = GFORM_SIM,
     seed = 1234,
     show_progress = TRUE,
-    # parallel = TRUE,
-    # ncores = parallel::detectCores() - 1,
     model_fits = TRUE
   )
 
@@ -177,11 +175,9 @@ predrisk <- predict.gformula(
   histvars = list(covs_dvs),
   histories = c(lagged),
   nsamples = 0,
-  nsimul = 100,
+  nsimul = 1000,
   seed = 1234,
   show_progress = TRUE,
-  # parallel = TRUE,
-  # ncores = parallel::detectCores() - 1,
   model_fits = TRUE
 )
 
@@ -190,27 +186,46 @@ predrisk <- predrisk %>%
   mutate(time = as.numeric(time))
 
 analytic_hat <-
-  left_join(analytic_long, predrisk, by = c("pid", "time")) %>%
-  filter(time == 3)
+  left_join(analytic_long, predrisk, by = c("pid", "time"))
 
-plot(pROC::roc(analytic_hat$event_chd, analytic_hat$pred))
+aucs <- map(0:3, function(t) {
+  df <- filter(analytic_hat, time == t)
+  pROC::roc(df$event_chd, df$pred)
+})
 
-# Create results tables ---------------------------------------------------
+map(aucs, pROC::ggroc)
 
-# sink("9_results/tables/cov_models_ldl.tex")
-# texreg(
-#   l = fit_ldl$fits[1:(length(covs_dvs) - 1)],
-#   booktabs = TRUE,
-#   use.packages = FALSE,
-#   table = FALSE
-# ) %>% print()
-# sink()
-# 
-# sink("9_results/tables/out_models_ldl.tex")
-# texreg(
-#   l = fit_ldl$fits[length(covs_dvs):(length(covs_dvs) + 1)],
-#   booktabs = TRUE,
-#   use.packages = FALSE,
-#   table = FALSE
-# ) %>% print()
-# sink()
+
+predrisk_t1 <- predict.gformula(
+  object = fit_pred,
+  obs_data = data.table::as.data.table(drop_na(analytic_long)),
+  newdata = data.table::as.data.table(newdata),
+  id = "pid",
+  t0 = 1,
+  covnames = covs_dvs, 
+  covtypes = covtypes,
+  covparams = covparams,
+  outcome_name = "event_chd",
+  ymodel = ymodel,
+  compevent_name = "event_dth",
+  compevent_model = compevent_model,
+  restrictions = restrictions,
+  basecovs = covs_fixed[!covs_fixed %in% covs_refs],
+  histvars = list(covs_dvs),
+  histories = c(lagged),
+  nsamples = 0,
+  nsimul = 1000,
+  seed = 1234,
+  show_progress = TRUE,
+  model_fits = TRUE
+)
+
+# plot some sample trajectories -------------------------------------------
+
+ggplot(predrisk, aes(x = time, y = survival)) +
+  geom_line(aes(group = factor(id)), alpha = 0.04) +
+  stat_summary(geom = "line", fun = mean, color = "blue", size = 1.2) +
+  stat_summary(geom = "point", fun = mean, color = "blue") +
+  theme_classic() +
+  coord_cartesian(expand = F)
+
