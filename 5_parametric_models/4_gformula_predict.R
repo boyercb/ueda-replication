@@ -148,7 +148,7 @@ fit_pred <-
     nsamples = 0,
     sim_data_b = TRUE,
     nsimul = GFORM_SIM,
-    seed = 1234,
+    seed = 4548076,
     show_progress = TRUE,
     model_fits = TRUE
   )
@@ -163,6 +163,7 @@ predrisk <- predict.gformula(
   obs_data = data.table::as.data.table(drop_na(analytic_long)),
   newdata = data.table::as.data.table(newdata),
   id = "pid",
+  t0 = 0,
   covnames = covs_dvs, 
   covtypes = covtypes,
   covparams = covparams,
@@ -175,18 +176,23 @@ predrisk <- predict.gformula(
   histvars = list(covs_dvs),
   histories = c(lagged),
   nsamples = 0,
-  nsimul = 1000,
-  seed = 1234,
+  nsimul = 500,
+  seed = 4548076,
   show_progress = TRUE,
   model_fits = TRUE
 )
 
-predrisk <- predrisk %>%
+Y.hat <- predrisk$Y.hat %>%
   pivot_longer(`0`:`3`, names_to = "time", values_to = "pred") %>%
   mutate(time = as.numeric(time))
 
 analytic_hat <-
-  left_join(analytic_long, predrisk, by = c("pid", "time"))
+  left_join(analytic_long, Y.hat, by = c("pid", "time"))
+
+stats <- map(0:3, function(t) {
+  df <- filter(analytic_hat, time == t)
+  rms::val.prob(df$pred, df$event_chd)
+})
 
 aucs <- map(0:3, function(t) {
   df <- filter(analytic_hat, time == t)
@@ -196,12 +202,16 @@ aucs <- map(0:3, function(t) {
 map(aucs, pROC::ggroc)
 
 
-predrisk_t1 <- predict.gformula(
+# plot some sample trajectories -------------------------------------------
+
+samples <- newdata[1:4,]
+
+trajectories <- predict.gformula(
   object = fit_pred,
   obs_data = data.table::as.data.table(drop_na(analytic_long)),
-  newdata = data.table::as.data.table(newdata),
+  newdata = data.table::as.data.table(samples),
   id = "pid",
-  t0 = 1,
+  t0 = 0,
   covnames = covs_dvs, 
   covtypes = covtypes,
   covparams = covparams,
@@ -215,17 +225,20 @@ predrisk_t1 <- predict.gformula(
   histories = c(lagged),
   nsamples = 0,
   nsimul = 1000,
-  seed = 1234,
-  show_progress = TRUE,
-  model_fits = TRUE
+  seed = 4548076,
+  model_fits = TRUE,
+  return_sims = TRUE
 )
 
-# plot some sample trajectories -------------------------------------------
-
-ggplot(predrisk, aes(x = time, y = survival)) +
+ggplot(trajectories$sims, aes(x = time, y = survival)) +
+  #facet_grid(~factor(id)) +
   geom_line(aes(group = factor(id)), alpha = 0.04) +
   stat_summary(geom = "line", fun = mean, color = "blue", size = 1.2) +
   stat_summary(geom = "point", fun = mean, color = "blue") +
-  theme_classic() +
+  g_theme() +
+  labs(
+    x = "Follow up",
+    y = "Predicted survival"
+  ) +
   coord_cartesian(expand = F)
 

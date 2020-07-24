@@ -1,7 +1,7 @@
 # take fitted models of joint distribution and simulate data for a given
 # baseline covariate profile
 
-predict.gformula <- function(object, obs_data, newdata = NULL, id, covnames, covtypes, covparams,
+predict.gformula <- function(object, obs_data, newdata = NULL, id, t0 = 0, covnames, covtypes, covparams,
                              covfits_custom = NA, covpredict_custom = NA,
                              histvars = NULL, histories = NA, basecovs = NA,
                              outcome_name, ymodel,
@@ -14,7 +14,7 @@ predict.gformula <- function(object, obs_data, newdata = NULL, id, covnames, cov
                              nsimul = NA, seed,
                              nsamples = 0, parallel = FALSE, ncores = NA,
                              ci_method = 'percentile', threads,
-                             show_progress = TRUE, ...){
+                             show_progress = TRUE, return_sims = FALSE, ...){
   if (object$time_points > 1){
     if (object$comprisk){
       fitD <- object$fits[[length(object$fits)]]
@@ -180,14 +180,14 @@ predict.gformula <- function(object, obs_data, newdata = NULL, id, covnames, cov
                                  comprisk = comprisk, ranges = ranges,
                                  yrange = yrange, compevent_range = compevent_range,
                                  outcome_type = outcome_type,
-                                 subseed = subseed, time_points = time_points,
+                                 subseed = subseed, t0 = t0, time_points = time_points,
                                  obs_data = newdata, parallel = parallel, max_visits = max_visits,
                                  baselags = baselags, below_zero_indicator = below_zero_indicator,
                                  min_time = min_time, show_progress = FALSE, ...)
     parallel::stopCluster(cl)
   } else {
     if (show_progress){
-      pb <- progress::progress_bar$new(total = nsimul * len,
+      pb <- progress::progress_bar$new(total = time_points,
                                        clear = FALSE,
                                        format = 'Simulation progress [:bar] :percent, Elapsed time :elapsed, Est. time remaining :eta')
     }
@@ -205,7 +205,7 @@ predict.gformula <- function(object, obs_data, newdata = NULL, id, covnames, cov
                covpredict_custom = covpredict_custom, basecovs = basecovs, comprisk = comprisk,
                ranges = ranges, yrange = yrange, compevent_range = compevent_range,
                outcome_type = outcome_type,
-               subseed = subseed, time_points = time_points,
+               subseed = subseed, t0 = t0, time_points = time_points,
                obs_data = newdata, parallel = parallel, max_visits = max_visits,
                baselags = baselags, below_zero_indicator = below_zero_indicator,
                min_time = min_time, show_progress = TRUE, pb = pb,...)
@@ -221,7 +221,16 @@ predict.gformula <- function(object, obs_data, newdata = NULL, id, covnames, cov
   
   # TODO: add functionality for multiple interventions
   
-  return(nat_result)
+  if (return_sims == TRUE) {
+    return(list(
+      "Y.hat" = nat_result,
+      "sims" = nat_pool
+    ))
+  } else {
+    return(list(
+      "Y.hat" = nat_result
+    ))
+  }
 }
 
 gformula.simulate <- function(o, fitcov, fitY, fitD,
@@ -229,7 +238,7 @@ gformula.simulate <- function(o, fitcov, fitY, fitD,
                      outcome_name, compevent_name, time_name,
                      intvars, interventions, int_times, histvars, histvals, histories,
                      comprisk, ranges, yrange, compevent_range,
-                     outcome_type, subseed, obs_data, time_points, parallel,
+                     outcome_type, subseed, obs_data, time_points, t0, parallel,
                      covnames, covtypes, covparams, covpredict_custom,
                      basecovs, max_visits, baselags, below_zero_indicator,
                      min_time, show_progress, pb, ...){
@@ -279,14 +288,17 @@ gformula.simulate <- function(o, fitcov, fitY, fitD,
   }
   
   for (t in ((1:time_points) - 1)){
-    if (t == 0){
+    if (show_progress){
+      pb$tick()
+    }
+    if (t <= t0){
       # Set simulated covariate values at time t = 0 equal to observed covariate values
       if (!is.na(basecovs[[1]])){
         pool <- obs_data[obs_data[[time_name]] <= t, ][, .SD, .SDcols = c(covnames, basecovs, time_name, 'oldid')]
       } else {
         pool <- obs_data[obs_data[[time_name]] <= t, ][, .SD, .SDcols = c(covnames, time_name, 'oldid')]
       }
-      data.table::set(pool, j = 'id', value = rep(ids_unique, each = 1 - min_time))
+      data.table::set(pool, j = 'id', value = obs_data[obs_data[[time_name]] <= t]$newid)
       if (!is.na(basecovs[[1]])){
         data.table::setcolorder(pool, c('id', time_name, covnames, basecovs, 'oldid'))
       } else {
@@ -699,9 +711,7 @@ gformula.simulate <- function(o, fitcov, fitY, fitD,
     pool[, 'survival' := stats::ave(pool$prodp0, by = pool$id, FUN = cumprod)]
   }
   pool2 <- data.table::copy(pool)
-  if (show_progress){
-    pb$tick()
-  }
+
   return (pool2)
 }
 
